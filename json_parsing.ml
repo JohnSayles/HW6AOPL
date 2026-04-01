@@ -276,6 +276,14 @@ let consume_num cs =
   in
   go (cs, [])
 
+(** [expect exp : list] takes a token list and returns the tail if the head matches the
+  expected token. If the head doesn't match or an empty list is passed, an error is raised.*)
+let expect (exp : list) =
+  match list with
+  | h :: tail when exp = h -> tail
+  | h :: _ -> syntax_error(h, "unexpected token")
+  | [] -> lexical_error("No input")
+
 (**4. [tokenize (s : string) : token list] converts an input string into a list
   of tokens.
   It repeatedly skips whitespace and then consumes the next token until
