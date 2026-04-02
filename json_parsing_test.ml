@@ -89,10 +89,10 @@ let tests_consume_keyword = "test suite for consume_keyword" >::: [
     (char_list_of_string "false ; true")
     (FalseTok, [' '; ';'; ' '; 't'; 'r'; 'u'; 'e']);
   make_test_1arg
-    "consume_keyword: nullnullnull"
+    "consume_keyword: null: true"
     consume_keyword
-    (char_list_of_string "nullnullnull")
-    (NullTok, ['n'; 'u'; 'l'; 'l'; 'n'; 'u'; 'l'; 'l']);
+    (char_list_of_string "null: true")
+    (NullTok, [':'; ' '; 't'; 'r'; 'u'; 'e']);
 ] (* add more tests *)
 
 let tests_consume_keyword_exceptions = "test suite for consume_keyword exceptions" >::: [
@@ -100,6 +100,16 @@ let tests_consume_keyword_exceptions = "test suite for consume_keyword exception
     "extra char in front of keyword"
     consume_keyword
     (char_list_of_string "ftrue")
+    (LexicalError "Lexical error: Expecting keyword of true, false, or null.");
+  make_exn_test_1arg
+    "extra char after keyword"
+    consume_keyword
+    (char_list_of_string "truef")
+    (LexicalError "Lexical error: Expecting keyword of true, false, or null.");
+  make_exn_test_1arg
+    "extra keywords"
+    consume_keyword
+    (char_list_of_string "nullnullnull")
     (LexicalError "Lexical error: Expecting keyword of true, false, or null.");
 ]
 
@@ -161,6 +171,25 @@ let tests_tokenize_exceptions = "test suite for tokenize exceptions" >::: [
     (LexicalError "Lexical error: Unknown character @");
 ]
 
+(* 5 *)
+let tests_parse_string = "test suite for parse_string" >::: [
+  make_test_1arg
+    ""
+    parse_string
+    ""
+]
+
+(* 6 *)
+let tests_except = "test suite for except" >::: [
+
+]
+
+(* 7 *)
+
+let tests_parse_json = "test suite for parse_json" >::: [
+  
+]
+
 let all_tests = "all tests" >::: [
   tests_consume_string_literal;
   tests_consume_string_literal_exceptions;
@@ -168,6 +197,8 @@ let all_tests = "all tests" >::: [
   tests_consume_keyword_exceptions;
   tests_tokenize;
   tests_tokenize_exceptions;
+  tests_parse_string;
+
 ]
 
 (* Run all tests *)
