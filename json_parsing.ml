@@ -305,8 +305,52 @@ let parse_string lst =
   | StringLit h :: t -> (h, t)
   | _ -> raise (SyntaxError "expected a string literal")
 
-let parson_json token_list = 
+(* Takes a token list and returns a pair of the parsed json value and the remaining token list*)
+let rec parse_json token_list =
+  match token_list with
+  | NumLit num :: t -> (Num num, t)
+  | StringLit str :: t -> (String str, t)
+  | TrueTok :: t -> (True, t)
+  | FalseTok :: t -> (False, t)
+  | NullTok :: t -> (Null, t)
+  | LBracket :: t -> parse_array t
+  | LBrace :: t -> parse_object t
+  | [] -> raise (SyntaxError "JSON Value expected, found end of input")
+  | h :: _ -> syntax_error(h, "JSON Value expected")
 
+and parse_array token_list =
+  match token_list with
+  | RBracket :: t -> (Array [], t)
+  | _ ->
+    let (ex, rest) = parse_elements token_list in
+    let rest_after_bracket = expect (RBracket, rest) in
+    (Array elements, rest_after_bracket)
+
+and parse_elements token_list =
+  let (first_value, rest) = parse_json token_list in
+  match rest with
+  | Comma :: t ->
+    let (other_values, final_rest) = parse_elements t in
+    (first_value :: other_values, final_rest)
+  | _ -> ([first_value], rest)
+
+and parse_object token_list =
+  match token_list with
+  | RBRace :: t -> (Object [], t)
+  | _ ->
+    let (members, rest) = parse_members token_list in
+    let rest_after_brace = expect (RBrace, rest) in
+    (Object members, rest_after_brace)
+
+and parse_members token_list =
+  let (key, rest1) = parse_string token_list in
+  let rest2 = expect (Colon, rest1) in
+  let (value, rest3) = parse_json rest2 in
+  match rest3 with
+  | Comma :: t ->
+      let (other_members, final_rest) = parse_members t include
+      ((key, value)) :: other_members, final_rest)
+  | _ -> ([(key,value)], rest3)
   
 (*let parse_from_file file_name = 
   let ic = open_in file_name in
