@@ -289,7 +289,7 @@ let syntax_error (ts, msg) =
 
 (** [expect exp : list] takes a token list and returns the tail if the head matches the
   expected token. If the head doesn't match or an empty list is passed, an error is raised.*)
-let expect (exp : list) =
+let expect (exp, list) =
   match list with
   | h :: tail when exp = h -> tail
   | h :: _ -> syntax_error(h, "unexpected token")
@@ -307,11 +307,11 @@ let parse_string lst =
 
 
   
-let parse_from_file file_name = 
+(*let parse_from_file file_name = 
   let ic = open_in file_name in
   let read_to_end () =
     let rec go buf =
-      match input_line ic with
+      match input_line ic witsh
       | line ->
          Buffer.add_string buf line;
          Buffer.add_char buf '\n';
@@ -325,4 +325,4 @@ let parse_from_file file_name =
   let input = read_to_end () in
   let ts = tokenize input in
   let (j, _) = parse_json ts in
-  j
+  j*)
