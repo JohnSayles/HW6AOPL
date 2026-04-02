@@ -1,3 +1,4 @@
+include Json
 (*****************************************************************************
  * JSON parsing: lexer and parser for a subset of JSON.
  *****************************************************************************)
@@ -18,6 +19,8 @@ type token =
   | RBracket            (* ] *)
   | Comma               (* , *)
   | Colon               (* : *)
+
+
 
 (*****************************************************************************
  * Basic token-printing support.
@@ -272,3 +275,54 @@ let consume_num cs =
 let tokenize (s : string) : token list =
   tokenize_char_list (char_list_of_string s)
 
+
+exception SyntaxError of string
+
+let syntax_error (ts, msg) = 
+  let tokenName =
+    match ts with
+      [] -> "EOF"
+    | t :: _ -> string_of_token t
+  in
+  raise (SyntaxError ("Syntax error at " ^ tokenName ^ ": " ^ msg)) 
+  
+
+(** [expect exp : list] takes a token list and returns the tail if the head matches the
+  expected token. If the head doesn't match or an empty list is passed, an error is raised.*)
+let expect (exp : list) =
+  match list with
+  | h :: tail when exp = h -> tail
+  | h :: _ -> syntax_error(h, "unexpected token")
+  | [] -> lexical_error("No input")
+
+
+(* parse_string : token list -> string * token list
+  Consumes a string literal token from the beginning of the token list and
+  returns a pair of the string value and the remaining token list. Raises a 
+  syntax error if the token list does not begin with a string literal. *)
+let parse_string lst = 
+  match lst with
+  | StringLit h :: t -> (h, t)
+  | _ -> raise (SyntaxError "expected a string literal")
+
+
+  
+let parse_from_file file_name = 
+  let ic = open_in file_name in
+  let read_to_end () =
+    let rec go buf =
+      match input_line ic with
+      | line ->
+         Buffer.add_string buf line;
+         Buffer.add_char buf '\n';
+         go buf
+      | exception End_of_file ->
+        close_in ic;
+        Buffer.contents buf
+    in
+    go (Buffer.create 256)
+  in
+  let input = read_to_end () in
+  let ts = tokenize input in
+  let (j, _) = parse_json ts in
+  j

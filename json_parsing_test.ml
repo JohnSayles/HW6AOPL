@@ -1,5 +1,10 @@
 open OUnit2
+open Json
+open Hw3
 open Json_parsing
+open Json_structures.Parsed_small_bus
+open Json_structures.Parsed_medium_bus
+open Json_structures.Parsed_complete_bus
 
 
 (* This file provides some example tests, and you need to add more. *)
