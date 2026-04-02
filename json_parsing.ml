@@ -305,6 +305,7 @@ let parse_string lst =
   | StringLit h :: t -> (h, t)
   | _ -> raise (SyntaxError "expected a string literal")
 
+let parson_json token_list = 
 
   
 (*let parse_from_file file_name = 
