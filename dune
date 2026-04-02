@@ -1,0 +1,28 @@
+(library
+ (name json)
+ (modules json))
+
+(library
+ (name json_structures)
+ (libraries json)
+ (modules parsed_complete_bus
+   parsed_medium_bus
+   parsed_small_bus))
+
+(library
+ (name hw3)
+ (modules hw3)
+ (libraries json))
+
+
+(tests
+ (names json_parsing_test)
+ (modules json_parsing_test json_parsing)
+ (libraries json ounit2 json_structures hw3)
+ (deps (glob_files *.json))
+ (instrumentation
+  (backend bisect_ppx)))
+
+(env
+  (dev
+    (flags (:standard -warn-error -A -w -27 -w -39 -w -33 -w -26))))
