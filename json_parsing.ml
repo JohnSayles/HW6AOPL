@@ -313,3 +313,12 @@ let tokenize (s : string) : token list =
   let (j, _) = parse_json ts in
   j
 
+(* parse_string : token list -> string * token list
+  Consumes a string literal token from the beginning of the token list and
+  returns a pair of the string value and the remaining token list. Raises a 
+  syntax error if the token list does not begin with a string literal. *)
+let parse_string lst = 
+  match lst with
+  | StringLit h :: t -> (h, t)
+  | _ -> raise (SyntaxError "expected a string literal")
+
