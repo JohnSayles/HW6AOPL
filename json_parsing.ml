@@ -4,6 +4,16 @@ include Json
  * JSON parsing: lexer and parser for a subset of JSON.
  *****************************************************************************)
 
+exception SyntaxError of string
+
+let syntax_error (ts, msg) = 
+  let tokenName =
+    match ts with
+      [] -> "EOF"
+    | t :: _ -> string_of_token t
+  in
+  raise (SyntaxError ("Syntax error at " ^ tokenName ^ ": " ^ msg))
+
 (*****************************************************************************
  * Token representation for the lexer.
  *****************************************************************************)
@@ -52,17 +62,6 @@ let string_of_token t =
 (*****************************************************************************
  * Small helper functions used by both the lexer and the parser.
  *****************************************************************************)
-
-exception SyntaxError of string
-
-let syntax_error (ts, msg) = 
-  let tokenName =
-    match ts with
-      [] -> "EOF"
-    | t :: _ -> string_of_token t
-  in
-  raise (SyntaxError ("Syntax error at " ^ tokenName ^ ": " ^ msg))
-
 
 (**[char_to_string c] is the one-character string containing [c]. *)
 let char_to_string = String.make 1
