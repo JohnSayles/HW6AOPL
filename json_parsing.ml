@@ -322,7 +322,7 @@ and parse_array token_list =
   match token_list with
   | RBracket :: t -> (Array [], t)
   | _ ->
-    let (ex, rest) = parse_elements token_list in
+    let (elements, rest) = parse_elements token_list in
     let rest_after_bracket = expect (RBracket, rest) in
     (Array elements, rest_after_bracket)
 
@@ -336,7 +336,7 @@ and parse_elements token_list =
 
 and parse_object token_list =
   match token_list with
-  | RBRace :: t -> (Object [], t)
+  | RBrace :: t -> (Object [], t)
   | _ ->
     let (members, rest) = parse_members token_list in
     let rest_after_brace = expect (RBrace, rest) in
@@ -348,8 +348,8 @@ and parse_members token_list =
   let (value, rest3) = parse_json rest2 in
   match rest3 with
   | Comma :: t ->
-      let (other_members, final_rest) = parse_members t include
-      ((key, value)) :: other_members, final_rest)
+      let (other_members, final_rest) = parse_members t in
+      ((key, value) :: other_members, final_rest)
   | _ -> ([(key,value)], rest3)
   
 (*let parse_from_file file_name = 
