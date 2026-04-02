@@ -308,7 +308,7 @@ let parse_string lst =
 (**[parse_json token_list] takes a token list and returns a pair of the
    parsed JSON value and the remaining token list. If the token list
    represents a complete/valid JSON value, it returns the value paired
-   with an empty yoken list. Otherwise, it raises a syntax error.*)
+   with an empty token list. Otherwise, it raises a syntax error.*)
 let rec parse_json token_list =
   match token_list with
   | NumLit num :: t -> (Num (float_of_string num), t)

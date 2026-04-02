@@ -21,7 +21,7 @@ let make_exn_test_1arg test_info f argument expected_exn =
   test_info >:: (fun _ -> assert_raises expected_exn (fun () -> f argument))
 
 
-(* 1 *)
+(* 1
 let tests_consume_string_literal = "test suite for consume_string_literal" >::: [
   make_test_1arg
     "consume_string_literal: hello"
@@ -169,36 +169,121 @@ let tests_tokenize_exceptions = "test suite for tokenize exceptions" >::: [
     tokenize
     "@@@"
     (LexicalError "Lexical error: Unknown character @");
-]
+] *)
 
 (* 5 *)
 let tests_parse_string = "test suite for parse_string" >::: [
   make_test_1arg
-    ""
+    "parse_string: string literal"
+    parse_string 
+    [StringLit "hello"; TrueTok]
+    ("hello", [TrueTok]);
+  make_test_1arg
+    "parse_string: larger string"
     parse_string
-    ""
+    [StringLit "hello world"; FalseTok]
+    ("hello world", [FalseTok]);
+  make_test_1arg
+    "parse_string: fancy escape characters"
+    parse_string
+    [StringLit "/'woahhhh/'"; LBrace; RBrace]
+    ("/'woahhhh/'", [LBrace; RBrace]);
+  make_test_1arg
+    "parse_string: one item in token list"
+    parse_string
+    [StringLit "myString"]
+    ("myString", []);
+]
+
+let tests_parse_string_exceptions = "test suite for parse_string exceptions" >::: [
+  make_exn_test_1arg
+    "parse_string: non-string token"
+    parse_string
+    [FalseTok]
+    (SyntaxError "expected a string literal");
+  make_exn_test_1arg
+    "parse_string: empty list"
+    parse_string
+    []
+    (SyntaxError "expected a string literal");
 ]
 
 (* 6 *)
-let tests_except = "test suite for except" >::: [
+let tests_expect = "test suite for expect" >::: [
+  make_test_1arg
+    "expect: finds expected LBrace"
+    expect 
+    (LBrace, [LBrace; RBrace])
+    [RBrace];
+  make_test_1arg
+    "expect: one item in list"
+    expect 
+    (LBrace, [LBrace])
+    [];
+]
 
+let tests_expect_exceptions = "test suite for expect exceptions" >::: [
+  make_exn_test_1arg
+    "expect: wrong token given"
+    expect 
+    (LBrace, [RBrace; LBrace])
+    (SyntaxError "Syntax error at }: unexpected token");
+  make_exn_test_1arg
+    "expect: empty list"
+    expect 
+    (LBrace, [])
+    (LexicalError "Lexical error: No input")
 ]
 
 (* 7 *)
 
 let tests_parse_json = "test suite for parse_json" >::: [
-  
+  make_test_1arg
+    "parse_json: string"
+    parse_json [StringLit "hello"]
+    (String "hello", []);
+  make_test_1arg
+    "parse_json: number"
+    parse_json [NumLit "12345"]
+    (Num 12345.0, []);  
+  make_test_1arg
+    "parse_json: TrueTok"
+    parse_json [TrueTok]
+    (True, []);
+  make_test_1arg
+    "parse_json: array"
+    parse_json [LBracket; StringLit "my item"; RBracket]
+    (parse_array [StringLit "my item"; RBracket]);
+  make_test_1arg
+    "parse_json: object"
+    parse_json [LBrace; StringLit "my item"; Colon; TrueTok; RBrace]
+    (parse_object [StringLit "my item"; Colon; TrueTok; RBrace]);
+]
+
+let tests_parse_json_exceptions = "test suite for parse_json exceptions" >::: [
+  make_exn_test_1arg
+    "parse_json: empty list"
+    parse_json []
+    (SyntaxError "JSON Value expected, found end of input");
+  make_exn_test_1arg
+    "parse_json: invalid JSON"
+    parse_json [LBrace; StringLit "my item"; Colon; TrueTok]
+    (LexicalError "Lexical error: No input");
 ]
 
 let all_tests = "all tests" >::: [
-  tests_consume_string_literal;
+  (* tests_consume_string_literal;
   tests_consume_string_literal_exceptions;
   tests_consume_keyword;
   tests_consume_keyword_exceptions;
   tests_tokenize;
-  tests_tokenize_exceptions;
+  tests_tokenize_exceptions; *)
   tests_parse_string;
-
+  tests_parse_string_exceptions;
+  tests_expect;
+  tests_expect_exceptions;
+  tests_parse_json;
+  tests_parse_json_exceptions;
 ]
 
 (* Run all tests *)

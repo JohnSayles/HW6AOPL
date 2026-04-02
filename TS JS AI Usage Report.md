@@ -30,3 +30,5 @@ We also asked the chatbot several followup questions asking it to clarify whethe
 - How do we make sure our solution handles the requirement below?
 
     - "If the token list represents a complete and valid JSON value, parse_json returns that value paired with an empty token list. Raises a syntax error if the token list does not represent a valid JSON value."
+
+- I'm writing many OCaml test cases for a homework assignment. The functions I'm writing test cases for are called parse_string, expect, and parse_json. Attached are the files that have the original functions. Break down writing these test cases as a step-by-step process.
