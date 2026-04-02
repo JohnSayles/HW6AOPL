@@ -289,10 +289,10 @@ let syntax_error (ts, msg) =
 
 (** [expect exp : list] takes a token list and returns the tail if the head matches the
   expected token. If the head doesn't match or an empty list is passed, an error is raised.*)
-let expect (exp, list) =
+let expect ((exp, list) : token * token list) : token list =
   match list with
   | h :: tail when exp = h -> tail
-  | h :: _ -> syntax_error(h, "unexpected token")
+  | h :: _ -> syntax_error(list, "unexpected token")
   | [] -> lexical_error("No input")
 
 
@@ -305,10 +305,13 @@ let parse_string lst =
   | StringLit h :: t -> (h, t)
   | _ -> raise (SyntaxError "expected a string literal")
 
-(* Takes a token list and returns a pair of the parsed json value and the remaining token list*)
+(**[parse_json token_list] takes a token list and returns a pair of the
+   parsed JSON value and the remaining token list. If the token list
+   represents a complete/valid JSON value, it returns the value paired
+   with an empty yoken list. Otherwise, it raises a syntax error.*)
 let rec parse_json token_list =
   match token_list with
-  | NumLit num :: t -> (Num num, t)
+  | NumLit num :: t -> (Num (float_of_string num), t)
   | StringLit str :: t -> (String str, t)
   | TrueTok :: t -> (True, t)
   | FalseTok :: t -> (False, t)
@@ -316,41 +319,49 @@ let rec parse_json token_list =
   | LBracket :: t -> parse_array t
   | LBrace :: t -> parse_object t
   | [] -> raise (SyntaxError "JSON Value expected, found end of input")
-  | h :: _ -> syntax_error(h, "JSON Value expected")
+  | h :: _ -> syntax_error(token_list, "JSON Value expected")
 
+  (** [parse_array token_list] parses an array from a token_list and returns
+      the array as a JSON value*)
 and parse_array token_list =
   match token_list with
   | RBracket :: t -> (Array [], t)
   | _ ->
-    let (elements, rest) = parse_elements token_list in
-    let rest_after_bracket = expect (RBracket, rest) in
-    (Array elements, rest_after_bracket)
+    let (ex, rest) = parse_elements token_list in
+    let after_bracket = expect (RBracket, rest) in
+    (Array ex, after_bracket)
 
+(** [parse_elements token_list] takes the elements of the array and returns
+    them as a JSON value within the array*)
 and parse_elements token_list =
-  let (first_value, rest) = parse_json token_list in
+  let (first, rest) = parse_json token_list in
   match rest with
   | Comma :: t ->
-    let (other_values, final_rest) = parse_elements t in
-    (first_value :: other_values, final_rest)
-  | _ -> ([first_value], rest)
+    let (other, final) = parse_elements t in
+    (first :: other, final)
+  | _ -> ([first], rest)
 
+(** [parse_object token_list] parses an array from a token_list and returns
+     the object as a JSON value*)
 and parse_object token_list =
   match token_list with
   | RBrace :: t -> (Object [], t)
   | _ ->
-    let (members, rest) = parse_members token_list in
-    let rest_after_brace = expect (RBrace, rest) in
-    (Object members, rest_after_brace)
+    let (ex, rest) = parse_members token_list in
+    let after_brace = expect (RBrace, rest) in
+    (Object ex, after_brace)
 
+(** [parse_members token_list] takes the members of the object in the token_list
+    and returns them as a JSON value within the object*)
 and parse_members token_list =
-  let (key, rest1) = parse_string token_list in
-  let rest2 = expect (Colon, rest1) in
-  let (value, rest3) = parse_json rest2 in
-  match rest3 with
+  let (key, r1) = parse_string token_list in
+  let r2 = expect (Colon, r1) in
+  let (value, r3) = parse_json r2 in
+  match r3 with
   | Comma :: t ->
-      let (other_members, final_rest) = parse_members t in
-      ((key, value) :: other_members, final_rest)
-  | _ -> ([(key,value)], rest3)
+      let (other, final) = parse_members t in
+      ((key, value) :: other, final)
+  | _ -> ([(key,value)], r3)
   
 (*let parse_from_file file_name = 
   let ic = open_in file_name in
