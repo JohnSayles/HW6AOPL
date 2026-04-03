@@ -271,6 +271,33 @@ let tests_parse_json_exceptions = "test suite for parse_json exceptions" >::: [
     (LexicalError "Lexical error: No input");
 ]
 
+let test_bus1 = "test suite for buses" >::: [
+  "small bus" >:: (fun _ ->
+    assert_equal
+      ~printer:string_of_json
+      small_bus_positions
+      (parse_from_file "small_bus.json")
+  );
+]
+
+let test_bus2 = "test suite for buses" >::: [
+  "medium bus" >:: (fun _ ->
+    assert_equal
+      ~printer:string_of_json
+      medium_bus_positions
+      (parse_from_file "medium_bus.json")
+  );
+]
+
+let test_bus3 = "test suite for buses" >::: [
+  "big bus" >:: (fun _ ->
+    assert_equal
+      ~printer:string_of_json
+      complete_bus_positions
+      (parse_from_file "complete_bus.json")
+  );
+]
+
 let all_tests = "all tests" >::: [
   (* tests_consume_string_literal;
   tests_consume_string_literal_exceptions;
@@ -284,6 +311,9 @@ let all_tests = "all tests" >::: [
   tests_expect_exceptions;
   tests_parse_json;
   tests_parse_json_exceptions;
+  test_bus1;
+  test_bus2;
+  test_bus3;
 ]
 
 (* Run all tests *)

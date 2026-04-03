@@ -363,11 +363,12 @@ and parse_members token_list =
       ((key, value) :: other, final)
   | _ -> ([(key,value)], r3)
   
-(*let parse_from_file file_name = 
+
+let parse_from_file file_name = 
   let ic = open_in file_name in
   let read_to_end () =
     let rec go buf =
-      match input_line ic witsh
+      match input_line ic with
       | line ->
          Buffer.add_string buf line;
          Buffer.add_char buf '\n';
@@ -381,4 +382,4 @@ and parse_members token_list =
   let input = read_to_end () in
   let ts = tokenize input in
   let (j, _) = parse_json ts in
-  j*)
+  j
